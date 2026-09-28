@@ -66,7 +66,6 @@ export default function Home() {
     }
   ];
 
-  // Banners originais
   const bannersOriginais = [
     "/banner.png",
     "/banner1.png",
@@ -75,7 +74,7 @@ export default function Home() {
     "/banner4.png"
   ];
 
-  // Adicionamos o primeiro banner no final para criar o efeito de loop contínuo sem transição seca
+  // Adicionamos o primeiro banner no final para criar o loop contínuo
   const banners = [...bannersOriginais, bannersOriginais[0]];
 
   const [bannerAtual, setBannerAtual] = useState(0);
@@ -96,35 +95,41 @@ export default function Home() {
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
+      if (!carrosselRef.current) return;
 
+      const larguraBanner = carrosselRef.current.clientWidth;
+      
       setBannerAtual((prev) => {
         const proximo = prev + 1;
-        if (carrosselRef.current) {
-          const larguraBanner = carrosselRef.current.clientWidth;
-          
-          if (proximo >= banners.length) {
-            return prev;
-          }
 
-          carrosselRef.current.scrollTo({
+        // Se o próximo for o índice do clone (último elemento)
+        if (proximo === banners.length - 1) {
+          // Roda suavemente até o clone
+          carrosselRef.current?.scrollTo({
             left: proximo * larguraBanner,
             behavior: 'smooth'
           });
 
-          // Se chegou na cópia do primeiro banner no final
-          if (proximo === bannersOriginais.length) {
-            setTimeout(() => {
-              if (carrosselRef.current) {
-                carrosselRef.current.scrollTo({
-                  left: 0,
-                  behavior: 'auto'
-                });
-              }
-              setBannerAtual(0);
-            }, 400); // Reseta instantaneamente e sem animação de volta após o término do slide
-            return 0;
-          }
+          // Espera exatamente o tempo da animação suave terminar (500ms) para resetar o scroll seco para o 0
+          setTimeout(() => {
+            if (carrosselRef.current) {
+              carrosselRef.current.scrollTo({
+                left: 0,
+                behavior: 'auto'
+              });
+            }
+            setBannerAtual(0);
+          }, 500);
+
+          return 0;
         }
+
+        // Rolagem normal entre os banners
+        carrosselRef.current?.scrollTo({
+          left: proximo * larguraBanner,
+          behavior: 'smooth'
+        });
+
         return proximo;
       });
     }, 3500);
@@ -133,7 +138,7 @@ export default function Home() {
       clearInterval(intervalo);
       if (resumeTimer.current) clearTimeout(resumeTimer.current);
     };
-  }, [banners.length, bannersOriginais.length]);
+  }, [banners.length]);
 
   const handleScroll = () => {
     if (!carrosselRef.current) return;
@@ -152,7 +157,7 @@ export default function Home() {
 
   return (
     <div 
-      className="min-h-screen w-full text-white flex flex-col items-center pb-12 bg-repeat bg-top"
+      className="min-h-screen w-full text-white flex flex-col items-center pb-12 bg-repeat bg-top overflow-x-hidden"
       style={{ 
         backgroundImage: "url('/fundo.png')",
         backgroundSize: "100% auto",
