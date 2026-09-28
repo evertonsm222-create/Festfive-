@@ -251,9 +251,7 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-1 w-full">
-          {/* Caixa de pesquisa principal */}
-          <div className="flex-1 relative flex items-center bg-white rounded-l-xl rounded-r-none border-2 border-r-0 border-[#1342e2] overflow-hidden shadow-sm h-10">
-            
+          <div className="flex-1 relative flex items-center bg-white rounded-xl border-2 border-[#1342e2] overflow-hidden shadow-sm h-10">
             <input
               type="text"
               value={termoBusca}
@@ -261,22 +259,15 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder="Buscar produto ou ofertas!"
               style={{ fontSize: "13px" }}
-              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-4 focus:outline-none relative z-10"
+              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-12 focus:outline-none"
             />
-          </div>
-
-          {/* 1. O retangulozinho da ponta fundido com a borda para formar uma peça única contínua */}
-          {/* 2. O botão com a imagem da lupa posicionado por cima exatamente com 50px de largura e 49px de altura */}
-          <div 
-            onClick={executarBusca}
-            className="relative shrink-0 bg-[#1342e2] rounded-tr-xl rounded-br-xl flex items-center justify-center cursor-pointer z-20 shadow-sm border-2 border-l-0 border-[#1342e2]"
-            style={{ width: '50px', height: '49px', marginLeft: '-2px' }}
-          >
-            <img 
-              src="/lupa.png" 
-              alt="Pesquisar" 
-              className="w-5 h-5 object-contain pointer-events-none" 
-            />
+            <div 
+              onClick={executarBusca}
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-end cursor-pointer"
+              style={{ width: '50px', height: '49px' }}
+            >
+              <img src="/lupa.png" alt="Pesquisar" className="w-full h-full object-fill object-right pointer-events-none" />
+            </div>
           </div>
 
           <Link href="/cliente">
@@ -379,7 +370,7 @@ export default function Home() {
                     className="bg-white rounded-lg overflow-hidden shadow-lg flex flex-col justify-between border border-gray-200 cursor-pointer relative"
                   >
                     
-                    {/* CAMADA DE OVERLAY UNIFICADA: Escurece o card inteiro por igual ao segurar */}
+                    {/* CAMADA DE OVERLAY UNIFICADA: Escurece o card inteiro por igual (imagem e texto) ao segurar */}
                     <div className={`absolute inset-0 bg-black/15 pointer-events-none transition-opacity duration-150 z-40 ${estaSegurando ? 'opacity-100' : 'opacity-0'}`} />
 
                     {/* Onda de escurecimento nascendo no ponto exato do toque */}
