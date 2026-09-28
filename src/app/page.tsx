@@ -75,11 +75,23 @@ export default function Home() {
   ];
 
   const [bannerAtual, setBannerAtual] = useState(0);
-  
-  // Referências para capturar o arraste do mouse
-  const mouseStartX = useRef(0);
-  const mouseEndX = useRef(0);
+  const carrosselRef = useRef<HTMLDivElement>(null);
+
+  // Referências para capturar o arraste (Mouse e Toque)
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
   const isDragging = useRef(false);
+
+  // Função para mover o carrossel visualmente para o índice atual (troca automática ou por clique)
+  useEffect(() => {
+    if (carrosselRef.current) {
+      const larguraBanner = carrosselRef.current.clientWidth;
+      carrosselRef.current.scrollTo({
+        left: bannerAtual * larguraBanner,
+        behavior: 'smooth'
+      });
+    }
+  }, [bannerAtual]);
 
   // Troca automática a cada 3.5 segundos
   useEffect(() => {
@@ -90,33 +102,51 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  // Funções para lidar com o clique e arraste do mouse no PC
+  // Eventos de Mouse (PC)
   const handleMouseDown = (e: React.MouseEvent) => {
     isDragging.current = true;
-    mouseStartX.current = e.clientX;
+    if (carrosselRef.current) {
+      startX.current = e.pageX - carrosselRef.current.offsetLeft;
+      scrollLeft.current = carrosselRef.current.scrollLeft;
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-    mouseEndX.current = e.clientX;
+    if (!isDragging.current || !carrosselRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - carrosselRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    carrosselRef.current.scrollLeft = scrollLeft.current - walk;
   };
 
   const handleMouseUp = () => {
-    if (!isDragging.current) return;
+    if (!isDragging.current || !carrosselRef.current) return;
     isDragging.current = false;
+    const larguraBanner = carrosselRef.current.clientWidth;
+    const indexArredondado = Math.round(carrosselRef.current.scrollLeft / larguraBanner);
+    setBannerAtual(Math.max(0, Math.min(indexArredondado, banners.length - 1)));
+  };
 
-    const distancia = mouseStartX.current - mouseEndX.current;
-    const limiteMinimo = 50; // Distância mínima em pixels para trocar o banner
-
-    if (Math.abs(distancia) > limiteMinimo) {
-      if (distancia > 0) {
-        // Arrastou para a esquerda (próximo banner)
-        setBannerAtual((prev) => (prev + 1) % banners.length);
-      } else {
-        // Arrastou para a direita (banner anterior)
-        setBannerAtual((prev) => (prev - 1 + banners.length) % banners.length);
-      }
+  // Eventos de Toque (Telemóvel / Celular)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (carrosselRef.current) {
+      startX.current = e.touches[0].clientX - carrosselRef.current.offsetLeft;
+      scrollLeft.current = carrosselRef.current.scrollLeft;
     }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!carrosselRef.current) return;
+    const x = e.touches[0].clientX - carrosselRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    carrosselRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+  const handleTouchEnd = () => {
+    if (!carrosselRef.current) return;
+    const larguraBanner = carrosselRef.current.clientWidth;
+    const indexArredondado = Math.round(carrosselRef.current.scrollLeft / larguraBanner);
+    setBannerAtual(Math.max(0, Math.min(indexArredondado, banners.length - 1)));
   };
 
   return (
@@ -172,44 +202,45 @@ export default function Home() {
         </div>
       </header>
 
-      {/* CARROSSEL COM SUPORTE A CLIQUE E ARRASTE NO MOUSE */}
+      {/* CARROSSEL ESTILO SHOPEE (PC E CELULAR) */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
         <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3">
           <div 
-            className="w-full h-72 overflow-hidden relative cursor-grab active:cursor-grabbing select-none"
+            ref={carrosselRef}
+            className="w-full h-72 flex overflow-x-auto snap-x snap-mandatory scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
-            
-            {/* Pilha de imagens com transição suave */}
             {banners.map((src, index) => (
-              <img 
-                key={src}
-                src={src} 
-                alt={`Banner ${index + 1}`} 
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out pointer-events-none ${
-                  bannerAtual === index ? "opacity-100 z-10" : "opacity-0 z-0"
-                }`}
-              />
+              <div key={src} className="w-full h-full shrink-0 snap-center relative">
+                <img 
+                  src={src} 
+                  alt={`Banner ${index + 1}`} 
+                  className="w-full h-full object-cover pointer-events-none"
+                />
+              </div>
             ))}
-            
-            {/* 5 Bolinhas indicadoras */}
-            <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20">
-              {banners.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`rounded-full transition-all duration-300 ${
-                    bannerAtual === index 
-                      ? "w-2.5 h-2.5 bg-white shadow scale-110" 
-                      : "w-1.5 h-1.5 bg-white/50"
-                  }`}
-                ></span>
-              ))}
-            </div>
-
           </div>
+            
+          {/* 5 Bolinhas indicadoras */}
+          <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
+            {banners.map((_, index) => (
+              <span 
+                key={index} 
+                className={`rounded-full transition-all duration-300 ${
+                  bannerAtual === index 
+                    ? "w-2.5 h-2.5 bg-white shadow scale-110" 
+                    : "w-1.5 h-1.5 bg-white/50"
+                }`}
+              ></span>
+            ))}
+          </div>
+
         </div>
       </main>
 
