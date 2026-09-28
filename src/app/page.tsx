@@ -255,7 +255,7 @@ export default function Home() {
           <div className="flex-1 relative flex items-center bg-white rounded-xl border-2 border-[#1342e2] overflow-hidden shadow-sm h-10">
             
             {/* Camada 1: O cantinho colorido exatamente na curva onde termina o input */}
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-[#1342e2] rounded-r-lg pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-11 bg-[#1342e2] rounded-r-xl pointer-events-none" />
 
             <input
               type="text"
