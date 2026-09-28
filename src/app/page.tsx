@@ -66,7 +66,7 @@ export default function Home() {
     }
   ];
 
-  const bannersOriginais = [
+  const banners = [
     "/banner.png",
     "/banner1.png",
     "/banner2.png",
@@ -74,11 +74,7 @@ export default function Home() {
     "/banner4.png"
   ];
 
-  // Adiciona o clone do primeiro banner no final
-  const banners = [...bannersOriginais, bannersOriginais[0]];
-
   const [indiceAtual, setIndiceAtual] = useState(0);
-  const [transicaoAtiva, setTransicaoAtiva] = useState(true);
   const isInteracting = useRef(false);
   const resumeTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -91,38 +87,23 @@ export default function Home() {
     }, 5000);
   };
 
+  // Sincronizado perfeitamente com a transição suave de 500ms
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
 
-      setIndiceAtual((prev) => prev + 1);
+      setIndiceAtual((prev) => (prev + 1) % banners.length);
     }, 3000);
 
     return () => {
       clearInterval(intervalo);
       if (resumeTimer.current) clearTimeout(resumeTimer.current);
     };
-  }, []);
-
-  // Monitora quando o carrossel chega exatamente no clone (último item)
-  const lidarComFimDaTransicao = () => {
-    if (indiceAtual === banners.length - 1) {
-      // Desliga a animação instantaneamente e joga de volta para o início real (índice 0)
-      setTransicaoAtiva(false);
-      setIndiceAtual(0);
-
-      // Religa a animação no próximo ciclo de renderização
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setTransicaoAtiva(true);
-        });
-      });
-    }
-  };
+  }, [banners.length]);
 
   return (
     <div 
-      className="min-h-screen w-full text-white flex flex-col items-center pb-12 bg-repeat bg-top overflow-x-hidden"
+      className="min-h-screen w-full text-white flex flex-col items-center pb-12 bg-repeat bg-top"
       style={{ 
         backgroundImage: "url('/fundo.png')",
         backgroundSize: "100% auto",
@@ -180,21 +161,13 @@ export default function Home() {
           onTouchStart={pausarPorInteracao}
           onMouseDown={pausarPorInteracao}
         >
-          {/* Trilho deslizante com evento nativo de término de transição */}
+          {/* Trilho deslizante sincronizado */}
           <div 
-            className={`flex w-full ${transicaoAtiva ? 'transition-transform duration-500 ease-in-out' : ''}`}
-            style={{ 
-              width: `${banners.length * 100}%`,
-              transform: `translateX(-${(indiceAtual * 100) / banners.length}%)` 
-            }}
-            onTransitionEnd={lidarComFimDaTransicao}
+            className="flex transition-transform duration-500 ease-in-out w-full"
+            style={{ transform: `translateX(-${indiceAtual * 100}%)` }}
           >
             {banners.map((src, index) => (
-              <div 
-                key={index} 
-                className="h-72 relative shrink-0"
-                style={{ width: `${100 / banners.length}%` }}
-              >
+              <div key={index} className="w-full h-72 shrink-0 relative">
                 <img 
                   src={src} 
                   alt={`Banner ${index + 1}`} 
@@ -206,11 +179,11 @@ export default function Home() {
             
           {/* Bolinhas indicadoras */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
-            {bannersOriginais.map((_, index) => (
+            {banners.map((_, index) => (
               <span 
                 key={index} 
                 className={`rounded-full transition-all duration-300 ${
-                  (indiceAtual % bannersOriginais.length) === index 
+                  indiceAtual === index 
                     ? "w-2.5 h-2.5 bg-white shadow scale-110" 
                     : "w-1.5 h-1.5 bg-white/50"
                 }`}
