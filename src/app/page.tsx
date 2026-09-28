@@ -77,14 +77,51 @@ export default function Home() {
   const [bannerAtual, setBannerAtual] = useState(0);
   const carrosselRef = useRef<HTMLDivElement>(null);
 
-  // Referências para capturar o arraste (Mouse e Toque)
+  // Referências para controle de arraste e pausa por interação
   const startX = useRef(0);
   const scrollLeft = useRef(0);
   const isDragging = useRef(false);
+  const userInteracting = useRef(false);
+  const resumeTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Função para mover o carrossel visualmente para o índice atual (troca automática ou por clique)
+  // Função para pausar a auto-rotação quando o utilizador interage
+  const pausarAutoRotacaoTemporariamente = () => {
+    userInteracting.current = true;
+    if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
+    
+    // Retoma a rotação automática apenas 5 segundos após o utilizador soltar o dedo/mouse
+    resumeTimeout.current = setTimeout(() => {
+      userInteracting.current = false;
+    }, 5000);
+  };
+
+  // Rotação automática controlada com verificação de interação
   useEffect(() => {
-    if (carrosselRef.current) {
+    const timer = setInterval(() => {
+      if (userInteracting.current) return; // Se o utilizador estiver a interagir, não faz o auto-play
+
+      setBannerAtual((prev) => {
+        const proximo = prev + 1;
+        if (proximo >= banners.length) {
+          // Se chegou ao último, volta para o primeiro de forma suave no trilho
+          if (carrosselRef.current) {
+            carrosselRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+          }
+          return 0;
+        }
+        return proximo;
+      });
+    }, 3500);
+
+    return () => {
+      clearInterval(timer);
+      if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
+    };
+  }, [banners.length]);
+
+  // Efeito para mover o carrossel quando o bannerAtual muda via auto-play
+  useEffect(() => {
+    if (carrosselRef.current && !isDragging.current) {
       const larguraBanner = carrosselRef.current.clientWidth;
       carrosselRef.current.scrollTo({
         left: bannerAtual * larguraBanner,
@@ -93,18 +130,10 @@ export default function Home() {
     }
   }, [bannerAtual]);
 
-  // Troca automática a cada 3.5 segundos
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setBannerAtual((prev) => (prev + 1) % banners.length);
-    }, 3500);
-
-    return () => clearInterval(timer);
-  }, [banners.length]);
-
   // Eventos de Mouse (PC)
   const handleMouseDown = (e: React.MouseEvent) => {
     isDragging.current = true;
+    pausarAutoRotacaoTemporariamente();
     if (carrosselRef.current) {
       startX.current = e.pageX - carrosselRef.current.offsetLeft;
       scrollLeft.current = carrosselRef.current.scrollLeft;
@@ -122,13 +151,18 @@ export default function Home() {
   const handleMouseUp = () => {
     if (!isDragging.current || !carrosselRef.current) return;
     isDragging.current = false;
+    pausarAutoRotacaoTemporariamente();
+
     const larguraBanner = carrosselRef.current.clientWidth;
     const indexArredondado = Math.round(carrosselRef.current.scrollLeft / larguraBanner);
-    setBannerAtual(Math.max(0, Math.min(indexArredondado, banners.length - 1)));
+    const novoIndex = Math.max(0, Math.min(indexArredondado, banners.length - 1));
+    setBannerAtual(novoIndex);
   };
 
   // Eventos de Toque (Telemóvel / Celular)
   const handleTouchStart = (e: React.TouchEvent) => {
+    isDragging.current = true;
+    pausarAutoRotacaoTemporariamente();
     if (carrosselRef.current) {
       startX.current = e.touches[0].clientX - carrosselRef.current.offsetLeft;
       scrollLeft.current = carrosselRef.current.scrollLeft;
@@ -136,17 +170,21 @@ export default function Home() {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!carrosselRef.current) return;
+    if (!isDragging.current || !carrosselRef.current) return;
     const x = e.touches[0].clientX - carrosselRef.current.offsetLeft;
     const walk = (x - startX.current) * 1.5;
     carrosselRef.current.scrollLeft = scrollLeft.current - walk;
   };
 
   const handleTouchEnd = () => {
-    if (!carrosselRef.current) return;
+    if (!isDragging.current || !carrosselRef.current) return;
+    isDragging.current = false;
+    pausarAutoRotacaoTemporariamente();
+
     const larguraBanner = carrosselRef.current.clientWidth;
     const indexArredondado = Math.round(carrosselRef.current.scrollLeft / larguraBanner);
-    setBannerAtual(Math.max(0, Math.min(indexArredondado, banners.length - 1)));
+    const novoIndex = Math.max(0, Math.min(indexArredondado, banners.length - 1));
+    setBannerAtual(novoIndex);
   };
 
   return (
@@ -202,7 +240,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* CARROSSEL ESTILO SHOPEE (PC E CELULAR) */}
+      {/* CARROSSEL ESTILO SHOPEE (COM TRAVAMENTO AO TOCAR E TRANSIÇÃO SUAVE) */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
         <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3">
           <div 
