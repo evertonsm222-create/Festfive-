@@ -101,14 +101,22 @@ export default function Home() {
       setBannerAtual((prev) => {
         const proximo = prev + 1;
 
-        // Se o próximo for o índice do clone (último elemento)
-        if (proximo === banners.length - 1) {
+        if (proximo >= banners.length) {
           carrosselRef.current?.scrollTo({
-            left: proximo * larguraBanner,
-            behavior: 'smooth'
+            left: 0,
+            behavior: 'auto'
           });
+          setBannerAtual(0);
+          return 0;
+        }
 
-          // Aumentado para 650ms para garantir que a rolagem suave termine 100% antes do reset seco
+        carrosselRef.current?.scrollTo({
+          left: proximo * larguraBanner,
+          behavior: 'smooth'
+        });
+
+        // Se chegou no clone (último banner), agendamos o reset instantâneo para o início logo após a animação suave
+        if (proximo === banners.length - 1) {
           setTimeout(() => {
             if (carrosselRef.current) {
               carrosselRef.current.scrollTo({
@@ -117,15 +125,10 @@ export default function Home() {
               });
             }
             setBannerAtual(0);
-          }, 650);
+          }, 600); // 600ms é o tempo ideal para a animação smooth concluir a viagem inteira
 
           return 0;
         }
-
-        carrosselRef.current?.scrollTo({
-          left: proximo * larguraBanner,
-          behavior: 'smooth'
-        });
 
         return proximo;
       });
