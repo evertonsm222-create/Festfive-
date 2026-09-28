@@ -251,7 +251,7 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-1 w-full">
-          <div className="flex-1 relative flex items-center bg-white rounded-xl border-3 border-[#1342e2] overflow-hidden shadow-sm h-10">
+          <div className="flex-1 relative flex items-center bg-white rounded-xl border-2 border-[#1342e2] overflow-hidden shadow-sm h-10">
             <input
               type="text"
               value={termoBusca}
