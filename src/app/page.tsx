@@ -91,21 +91,32 @@ export default function Home() {
     }, 5000);
   };
 
-  // Auto-play contínuo sincronizado
+  // Auto-play com transição inteligente no final da lista
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
 
       setBannerAtual((prev) => {
-        const proximo = (prev + 1) % banners.length;
+        const proximo = prev + 1;
         if (carrosselRef.current) {
           const larguraBanner = carrosselRef.current.clientWidth;
-          carrosselRef.current.scrollTo({
-            left: proximo * larguraBanner,
-            behavior: 'smooth'
-          });
+          
+          if (proximo >= banners.length) {
+            // Se chegou ao fim, faz um salto instantâneo (sem animação de volta) para o primeiro banner
+            carrosselRef.current.scrollTo({
+              left: 0,
+              behavior: 'auto'
+            });
+            return 0;
+          } else {
+            // Avança normalmente com suavidade
+            carrosselRef.current.scrollTo({
+              left: proximo * larguraBanner,
+              behavior: 'smooth'
+            });
+          }
         }
-        return proximo;
+        return proximo >= banners.length ? 0 : proximo;
       });
     }, 3500);
 
@@ -180,7 +191,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* CARROSSEL ESTILO SHOPEE COM SINCRONIZAÇÃO EM TEMPO REAL */}
+      {/* CARROSSEL COM LOOP INTELIGENTE SEM VOLTAGEM SECA */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
         <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3">
           <div 
@@ -201,7 +212,7 @@ export default function Home() {
             ))}
           </div>
             
-          {/* Bolinhas indicadoras sincronizadas perfeitamente */}
+          {/* Bolinhas indicadoras sincronizadas */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
             {banners.map((_, index) => (
               <span 
