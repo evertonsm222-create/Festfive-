@@ -74,7 +74,6 @@ export default function Home() {
     "/banner4.png"
   ];
 
-  // Adicionamos o primeiro banner no final para criar o loop contínuo
   const banners = [...bannersOriginais, bannersOriginais[0]];
 
   const [bannerAtual, setBannerAtual] = useState(0);
@@ -104,13 +103,12 @@ export default function Home() {
 
         // Se o próximo for o índice do clone (último elemento)
         if (proximo === banners.length - 1) {
-          // Roda suavemente até o clone
           carrosselRef.current?.scrollTo({
             left: proximo * larguraBanner,
             behavior: 'smooth'
           });
 
-          // Espera exatamente o tempo da animação suave terminar (500ms) para resetar o scroll seco para o 0
+          // Aumentado para 650ms para garantir que a rolagem suave termine 100% antes do reset seco
           setTimeout(() => {
             if (carrosselRef.current) {
               carrosselRef.current.scrollTo({
@@ -119,12 +117,11 @@ export default function Home() {
               });
             }
             setBannerAtual(0);
-          }, 500);
+          }, 650);
 
           return 0;
         }
 
-        // Rolagem normal entre os banners
         carrosselRef.current?.scrollTo({
           left: proximo * larguraBanner,
           behavior: 'smooth'
