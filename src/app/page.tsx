@@ -66,7 +66,8 @@ export default function Home() {
     }
   ];
 
-  const banners = [
+  // Banners originais
+  const bannersOriginais = [
     "/banner.png",
     "/banner1.png",
     "/banner2.png",
@@ -74,7 +75,12 @@ export default function Home() {
     "/banner4.png"
   ];
 
-  const [indiceAtual, setIndiceAtual] = useState(0);
+  // Adicionamos o primeiro banner no final para criar o efeito de loop contínuo sem transição seca
+  const banners = [...bannersOriginais, bannersOriginais[0]];
+
+  const [bannerAtual, setBannerAtual] = useState(0);
+  const carrosselRef = useRef<HTMLDivElement>(null);
+
   const isInteracting = useRef(false);
   const resumeTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -87,19 +93,62 @@ export default function Home() {
     }, 5000);
   };
 
-  // Sincronizado perfeitamente com a transição suave de 500ms
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
 
-      setIndiceAtual((prev) => (prev + 1) % banners.length);
-    }, 3000);
+      setBannerAtual((prev) => {
+        const proximo = prev + 1;
+        if (carrosselRef.current) {
+          const larguraBanner = carrosselRef.current.clientWidth;
+          
+          if (proximo >= banners.length) {
+            return prev;
+          }
+
+          carrosselRef.current.scrollTo({
+            left: proximo * larguraBanner,
+            behavior: 'smooth'
+          });
+
+          // Se chegou na cópia do primeiro banner no final
+          if (proximo === bannersOriginais.length) {
+            setTimeout(() => {
+              if (carrosselRef.current) {
+                carrosselRef.current.scrollTo({
+                  left: 0,
+                  behavior: 'auto'
+                });
+              }
+              setBannerAtual(0);
+            }, 400); // Reseta instantaneamente e sem animação de volta após o término do slide
+            return 0;
+          }
+        }
+        return proximo;
+      });
+    }, 3500);
 
     return () => {
       clearInterval(intervalo);
       if (resumeTimer.current) clearTimeout(resumeTimer.current);
     };
-  }, [banners.length]);
+  }, [banners.length, bannersOriginais.length]);
+
+  const handleScroll = () => {
+    if (!carrosselRef.current) return;
+    const larguraBanner = carrosselRef.current.clientWidth;
+    const scrollAtual = carrosselRef.current.scrollLeft;
+    let indexCalculado = Math.round(scrollAtual / larguraBanner);
+    
+    if (indexCalculado >= bannersOriginais.length) {
+      indexCalculado = 0;
+    }
+
+    if (indexCalculado !== bannerAtual && indexCalculado >= 0 && indexCalculado < bannersOriginais.length) {
+      setBannerAtual(indexCalculado);
+    }
+  };
 
   return (
     <div 
@@ -156,18 +205,16 @@ export default function Home() {
 
       {/* CARROSSEL */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
-        <div 
-          className="relative w-screen left-1/2 -translate-x-1/2 mb-3 overflow-hidden"
-          onTouchStart={pausarPorInteracao}
-          onMouseDown={pausarPorInteracao}
-        >
-          {/* Trilho deslizante sincronizado */}
+        <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3">
           <div 
-            className="flex transition-transform duration-500 ease-in-out w-full"
-            style={{ transform: `translateX(-${indiceAtual * 100}%)` }}
+            ref={carrosselRef}
+            onScroll={handleScroll}
+            onTouchStart={pausarPorInteracao}
+            onMouseDown={pausarPorInteracao}
+            className="w-full h-72 flex overflow-x-auto snap-x snap-mandatory scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none"
           >
             {banners.map((src, index) => (
-              <div key={index} className="w-full h-72 shrink-0 relative">
+              <div key={`${src}-${index}`} className="w-full h-full shrink-0 snap-center relative">
                 <img 
                   src={src} 
                   alt={`Banner ${index + 1}`} 
@@ -179,11 +226,11 @@ export default function Home() {
             
           {/* Bolinhas indicadoras */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
-            {banners.map((_, index) => (
+            {bannersOriginais.map((_, index) => (
               <span 
                 key={index} 
                 className={`rounded-full transition-all duration-300 ${
-                  indiceAtual === index 
+                  bannerAtual === index 
                     ? "w-2.5 h-2.5 bg-white shadow scale-110" 
                     : "w-1.5 h-1.5 bg-white/50"
                 }`}
