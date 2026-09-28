@@ -66,7 +66,7 @@ export default function Home() {
     }
   ];
 
-  const banners = [
+  const bannersOriginais = [
     "/banner.png",
     "/banner1.png",
     "/banner2.png",
@@ -74,7 +74,10 @@ export default function Home() {
     "/banner4.png"
   ];
 
+  const banners = [...bannersOriginais, bannersOriginais[0]];
+
   const [indiceAtual, setIndiceAtual] = useState(0);
+  const [transicaoAtiva, setTransicaoAtiva] = useState(true);
   const isInteracting = useRef(false);
   const resumeTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -87,12 +90,23 @@ export default function Home() {
     }, 5000);
   };
 
-  // Sincronizado perfeitamente com a transição suave de 500ms
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
 
-      setIndiceAtual((prev) => (prev + 1) % banners.length);
+      setIndiceAtual((prev) => {
+        const proximo = prev + 1;
+        
+        if (proximo === banners.length - 1) {
+          setTimeout(() => {
+            setTransicaoAtiva(false);
+            setIndiceAtual(0);
+            setTimeout(() => setTransicaoAtiva(true), 50);
+          }, 500);
+        }
+
+        return proximo >= banners.length ? 0 : proximo;
+      });
     }, 3000);
 
     return () => {
@@ -103,7 +117,7 @@ export default function Home() {
 
   return (
     <div 
-      className="min-h-screen w-full text-white flex flex-col items-center pb-12 bg-repeat bg-top"
+      className="min-h-screen w-full text-white flex flex-col items-center pb-12 bg-repeat bg-top overflow-x-hidden"
       style={{ 
         backgroundImage: "url('/fundo.png')",
         backgroundSize: "100% auto",
@@ -157,17 +171,20 @@ export default function Home() {
       {/* CARROSSEL */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
         <div 
-          className="relative w-screen left-1/2 -translate-x-1/2 mb-3 overflow-hidden"
+          className="relative w-full overflow-hidden mb-3 rounded-xl"
           onTouchStart={pausarPorInteracao}
           onMouseDown={pausarPorInteracao}
         >
-          {/* Trilho deslizante sincronizado */}
+          {/* Trilho deslizante com largura proporcional exata baseada na quantidade de banners */}
           <div 
-            className="flex transition-transform duration-500 ease-in-out w-full"
-            style={{ transform: `translateX(-${indiceAtual * 100}%)` }}
+            className={`flex ${transicaoAtiva ? 'transition-transform duration-500 ease-in-out' : ''}`}
+            style={{ 
+              width: `${banners.length * 100}%`,
+              transform: `translateX(-${(indiceAtual * 100) / banners.length}%)` 
+            }}
           >
             {banners.map((src, index) => (
-              <div key={index} className="w-full h-72 shrink-0 relative">
+              <div key={index} className="h-72 relative" style={{ width: `${100 / banners.length}%` }}>
                 <img 
                   src={src} 
                   alt={`Banner ${index + 1}`} 
@@ -179,11 +196,11 @@ export default function Home() {
             
           {/* Bolinhas indicadoras */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
-            {banners.map((_, index) => (
+            {bannersOriginais.map((_, index) => (
               <span 
                 key={index} 
                 className={`rounded-full transition-all duration-300 ${
-                  indiceAtual === index 
+                  (indiceAtual % bannersOriginais.length) === index 
                     ? "w-2.5 h-2.5 bg-white shadow scale-110" 
                     : "w-1.5 h-1.5 bg-white/50"
                 }`}
