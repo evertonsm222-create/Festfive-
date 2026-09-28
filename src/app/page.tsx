@@ -77,7 +77,6 @@ export default function Home() {
   const [bannerAtual, setBannerAtual] = useState(0);
   const carrosselRef = useRef<HTMLDivElement>(null);
 
-  // Controle de interação e pausa por toque
   const isInteracting = useRef(false);
   const resumeTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -85,13 +84,12 @@ export default function Home() {
     isInteracting.current = true;
     if (resumeTimer.current) clearTimeout(resumeTimer.current);
 
-    // Pausa o auto-play por 5 segundos após soltar o dedo
     resumeTimer.current = setTimeout(() => {
       isInteracting.current = false;
     }, 5000);
   };
 
-  // Auto-play com transição inteligente no final da lista
+  // Auto-play contínuo e infinito para a frente
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
@@ -102,14 +100,13 @@ export default function Home() {
           const larguraBanner = carrosselRef.current.clientWidth;
           
           if (proximo >= banners.length) {
-            // Se chegou ao fim, faz um salto instantâneo (sem animação de volta) para o primeiro banner
+            // Vai para o primeiro de forma fluida simulando o giro contínuo
             carrosselRef.current.scrollTo({
               left: 0,
-              behavior: 'auto'
+              behavior: 'smooth'
             });
             return 0;
           } else {
-            // Avança normalmente com suavidade
             carrosselRef.current.scrollTo({
               left: proximo * larguraBanner,
               behavior: 'smooth'
@@ -126,7 +123,6 @@ export default function Home() {
     };
   }, [banners.length]);
 
-  // Sincroniza o index atual em tempo real enquanto o utilizador faz o scroll/toque lateral
   const handleScroll = () => {
     if (!carrosselRef.current) return;
     const larguraBanner = carrosselRef.current.clientWidth;
@@ -191,7 +187,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* CARROSSEL COM LOOP INTELIGENTE SEM VOLTAGEM SECA */}
+      {/* CARROSSEL */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
         <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3">
           <div 
@@ -212,7 +208,7 @@ export default function Home() {
             ))}
           </div>
             
-          {/* Bolinhas indicadoras sincronizadas */}
+          {/* Bolinhas indicadoras */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
             {banners.map((_, index) => (
               <span 
