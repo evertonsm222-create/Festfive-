@@ -266,10 +266,12 @@ export default function Home() {
               className="absolute right-0 top-0 bottom-0 bg-[#1342e2] rounded-r-xl flex items-center justify-center cursor-pointer overflow-hidden"
               style={{ width: '45px' }}
             >
+              {/* Altere o valor de translateX(6px) aqui para testar o deslocamento exato */}
               <img 
                 src="/lupa.png" 
                 alt="Pesquisar" 
-                className="w-5 h-5 object-contain filter brightness-0 invert pointer-events-none translate-x-1.5" 
+                className="w-5 h-5 object-contain filter brightness-0 invert pointer-events-none" 
+                style={{ transform: 'translateX(6px)' }}
               />
             </div>
           </div>
