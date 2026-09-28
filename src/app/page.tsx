@@ -259,14 +259,20 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder="Buscar produto ou ofertas!"
               style={{ fontSize: "13px" }}
-              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-12 focus:outline-none"
+              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-12 focus:outline-none border-none shadow-none"
             />
             <div 
               onClick={executarBusca}
-              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-end cursor-pointer"
-              style={{ width: '50px', height: '49px' }}
+              className="absolute right-0 top-0 bottom-0 bg-[#1342e2] rounded-r-xl flex items-center justify-center cursor-pointer overflow-hidden"
+              style={{ width: '45px' }}
             >
-              <img src="/lupa.png" alt="Pesquisar" className="w-full h-full object-fill object-right pointer-events-none" />
+              {/* Altere o valor de translateX(6px) aqui para testar o deslocamento exato */}
+              <img 
+                src="/lupa.png" 
+                alt="Pesquisar" 
+                className="w-5 h-5 object-contain filter brightness-0 invert pointer-events-none" 
+                style={{ transform: 'translateX(6px)' }}
+              />
             </div>
           </div>
 
