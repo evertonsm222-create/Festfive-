@@ -77,114 +77,54 @@ export default function Home() {
   const [bannerAtual, setBannerAtual] = useState(0);
   const carrosselRef = useRef<HTMLDivElement>(null);
 
-  // Referências para controle de arraste e pausa por interação
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-  const isDragging = useRef(false);
-  const userInteracting = useRef(false);
-  const resumeTimeout = useRef<NodeJS.Timeout | null>(null);
+  // Controle de interação e pausa por toque
+  const isInteracting = useRef(false);
+  const resumeTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Função para pausar a auto-rotação quando o utilizador interage
-  const pausarAutoRotacaoTemporariamente = () => {
-    userInteracting.current = true;
-    if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
-    
-    // Retoma a rotação automática apenas 5 segundos após o utilizador soltar o dedo/mouse
-    resumeTimeout.current = setTimeout(() => {
-      userInteracting.current = false;
+  const pausarPorInteracao = () => {
+    isInteracting.current = true;
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+
+    // Pausa o auto-play por 5 segundos após soltar o dedo
+    resumeTimer.current = setTimeout(() => {
+      isInteracting.current = false;
     }, 5000);
   };
 
-  // Rotação automática controlada com verificação de interação
+  // Auto-play contínuo sincronizado
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (userInteracting.current) return; // Se o utilizador estiver a interagir, não faz o auto-play
+    const intervalo = setInterval(() => {
+      if (isInteracting.current) return;
 
       setBannerAtual((prev) => {
-        const proximo = prev + 1;
-        if (proximo >= banners.length) {
-          // Se chegou ao último, volta para o primeiro de forma suave no trilho
-          if (carrosselRef.current) {
-            carrosselRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-          }
-          return 0;
+        const proximo = (prev + 1) % banners.length;
+        if (carrosselRef.current) {
+          const larguraBanner = carrosselRef.current.clientWidth;
+          carrosselRef.current.scrollTo({
+            left: proximo * larguraBanner,
+            behavior: 'smooth'
+          });
         }
         return proximo;
       });
     }, 3500);
 
     return () => {
-      clearInterval(timer);
-      if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
+      clearInterval(intervalo);
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
     };
   }, [banners.length]);
 
-  // Efeito para mover o carrossel quando o bannerAtual muda via auto-play
-  useEffect(() => {
-    if (carrosselRef.current && !isDragging.current) {
-      const larguraBanner = carrosselRef.current.clientWidth;
-      carrosselRef.current.scrollTo({
-        left: bannerAtual * larguraBanner,
-        behavior: 'smooth'
-      });
-    }
-  }, [bannerAtual]);
-
-  // Eventos de Mouse (PC)
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-    pausarAutoRotacaoTemporariamente();
-    if (carrosselRef.current) {
-      startX.current = e.pageX - carrosselRef.current.offsetLeft;
-      scrollLeft.current = carrosselRef.current.scrollLeft;
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current || !carrosselRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - carrosselRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1.5;
-    carrosselRef.current.scrollLeft = scrollLeft.current - walk;
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging.current || !carrosselRef.current) return;
-    isDragging.current = false;
-    pausarAutoRotacaoTemporariamente();
-
+  // Sincroniza o index atual em tempo real enquanto o utilizador faz o scroll/toque lateral
+  const handleScroll = () => {
+    if (!carrosselRef.current) return;
     const larguraBanner = carrosselRef.current.clientWidth;
-    const indexArredondado = Math.round(carrosselRef.current.scrollLeft / larguraBanner);
-    const novoIndex = Math.max(0, Math.min(indexArredondado, banners.length - 1));
-    setBannerAtual(novoIndex);
-  };
-
-  // Eventos de Toque (Telemóvel / Celular)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    isDragging.current = true;
-    pausarAutoRotacaoTemporariamente();
-    if (carrosselRef.current) {
-      startX.current = e.touches[0].clientX - carrosselRef.current.offsetLeft;
-      scrollLeft.current = carrosselRef.current.scrollLeft;
+    const scrollAtual = carrosselRef.current.scrollLeft;
+    const indexCalculado = Math.round(scrollAtual / larguraBanner);
+    
+    if (indexCalculado !== bannerAtual && indexCalculado >= 0 && indexCalculado < banners.length) {
+      setBannerAtual(indexCalculado);
     }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging.current || !carrosselRef.current) return;
-    const x = e.touches[0].clientX - carrosselRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1.5;
-    carrosselRef.current.scrollLeft = scrollLeft.current - walk;
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging.current || !carrosselRef.current) return;
-    isDragging.current = false;
-    pausarAutoRotacaoTemporariamente();
-
-    const larguraBanner = carrosselRef.current.clientWidth;
-    const indexArredondado = Math.round(carrosselRef.current.scrollLeft / larguraBanner);
-    const novoIndex = Math.max(0, Math.min(indexArredondado, banners.length - 1));
-    setBannerAtual(novoIndex);
   };
 
   return (
@@ -240,19 +180,15 @@ export default function Home() {
         </div>
       </header>
 
-      {/* CARROSSEL ESTILO SHOPEE (COM TRAVAMENTO AO TOCAR E TRANSIÇÃO SUAVE) */}
+      {/* CARROSSEL ESTILO SHOPEE COM SINCRONIZAÇÃO EM TEMPO REAL */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
         <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3">
           <div 
             ref={carrosselRef}
+            onScroll={handleScroll}
+            onTouchStart={pausarPorInteracao}
+            onMouseDown={pausarPorInteracao}
             className="w-full h-72 flex overflow-x-auto snap-x snap-mandatory scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
           >
             {banners.map((src, index) => (
               <div key={src} className="w-full h-full shrink-0 snap-center relative">
@@ -265,7 +201,7 @@ export default function Home() {
             ))}
           </div>
             
-          {/* 5 Bolinhas indicadoras */}
+          {/* Bolinhas indicadoras sincronizadas perfeitamente */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
             {banners.map((_, index) => (
               <span 
