@@ -79,8 +79,12 @@ export default function Home() {
 
   const [bannerAtual, setBannerAtual] = useState(0);
   const [termoBusca, setTermoBusca] = useState('');
-  const carrosselRef = useRef<HTMLDivElement>(null);
+  const [termoFiltrado, setTermoFiltrado] = useState('');
+  
+  const [ondas, setOndas] = useState<{ [key: number]: { x: number; y: number; id: number }[] }>({});
+  const [cardPressionado, setCardPressionado] = useState<number | null>(null);
 
+  const carrosselRef = useRef<HTMLDivElement>(null);
   const isInteracting = useRef(false);
   const resumeTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -156,9 +160,54 @@ export default function Home() {
     }
   };
 
-  // Filtragem dinâmica dos produtos de acordo com a pesquisa
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = e.target.value;
+    setTermoBusca(valor);
+    if (valor === '') {
+      setTermoFiltrado('');
+    }
+  };
+
+  const executarBusca = () => {
+    setTermoFiltrado(termoBusca);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      executarBusca();
+    }
+  };
+
+  const handleTouchStartCard = (e: React.TouchEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>, idProduto: number) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const novaOndaId = Date.now();
+
+    setCardPressionado(idProduto);
+    setOndas((prev) => ({
+      ...prev,
+      [idProduto]: [...(prev[idProduto] || []), { x, y, id: novaOndaId }]
+    }));
+
+    setTimeout(() => {
+      setOndas((prev) => ({
+        ...prev,
+        [idProduto]: (prev[idProduto] || []).filter((onda) => onda.id !== novaOndaId)
+      }));
+    }, 600);
+  };
+
+  const handleTouchEndCard = () => {
+    setCardPressionado(null);
+  };
+
   const produtosFiltrados = produtosIniciais.filter((produto) => {
-    const textoBusca = termoBusca.toLowerCase();
+    const textoBusca = termoFiltrado.toLowerCase();
+    if (!textoBusca) return true;
     const tituloCompleto = `${produto.linha1} ${produto.linha2}`.toLowerCase();
     return tituloCompleto.includes(textoBusca);
   });
@@ -173,6 +222,22 @@ export default function Home() {
       }}
     >
       
+      <style jsx global>{`
+        @keyframes rippleWave {
+          0% {
+            transform: scale(0);
+            opacity: 0.25;
+          }
+          100% {
+            transform: scale(30);
+            opacity: 0;
+          }
+        }
+        .animate-ripple-wave {
+          animation: rippleWave 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+      `}</style>
+
       {/* HEADER */}
       <header className="w-full px-2 pt-5 pb-3 flex flex-col gap-4 bg-[#00092d] relative z-50">
         <div className="flex items-center justify-center w-full">
@@ -190,16 +255,18 @@ export default function Home() {
             <input
               type="text"
               value={termoBusca}
-              onChange={(e) => setTermoBusca(e.target.value)}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               placeholder="Buscar produto ou ofertas!"
               style={{ fontSize: "13px" }}
               className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-12 focus:outline-none"
             />
             <div 
-              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center"
+              onClick={executarBusca}
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
               style={{ width: '50px', height: '49px' }}
             >
-              <img src="/lupa.png" alt="Pesquisar" className="w-full h-full object-fill" />
+              <img src="/lupa.png" alt="Pesquisar" className="w-full h-full object-fill pointer-events-none" />
             </div>
           </div>
 
@@ -241,7 +308,6 @@ export default function Home() {
             ))}
           </div>
             
-          {/* Bolinhas indicadoras */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
             {bannersOriginais.map((_, index) => (
               <span 
@@ -290,54 +356,82 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-2 items-stretch">
             
             {produtosFiltrados.length > 0 ? (
-              produtosFiltrados.map((produto) => (
-                <div 
-                  key={produto.id} 
-                  className="bg-white rounded-lg overflow-hidden shadow-lg flex flex-col justify-between border border-gray-200 transition-transform duration-150 active:scale-95 cursor-pointer"
-                >
-                  
-                  {/* Imagem do Card */}
-                  <div className={`w-full ${produto.alturaCard} bg-gray-50 relative flex items-center justify-center p-2 shrink-0`}>
-                    <img src="/perfil.jpeg" alt={produto.linha1} className="w-full h-full object-contain" />
-                  </div>
+              produtosFiltrados.map((produto) => {
+                const estaSegurando = cardPressionado === produto.id;
 
-                  {/* Área de Texto */}
-                  <div className="p-2.5 flex flex-col justify-between flex-1 text-gray-900 w-full">
+                return (
+                  <div 
+                    key={produto.id} 
+                    onMouseDown={(e) => handleTouchStartCard(e, produto.id)}
+                    onMouseUp={handleTouchEndCard}
+                    onMouseLeave={handleTouchEndCard}
+                    onTouchStart={(e) => handleTouchStartCard(e, produto.id)}
+                    onTouchEnd={handleTouchEndCard}
+                    className="bg-white rounded-lg overflow-hidden shadow-lg flex flex-col justify-between border border-gray-200 cursor-pointer relative"
+                  >
                     
-                    {/* Bloco do Título */}
-                    <div className="flex flex-col gap-0.5 w-full">
-                      <h4 className="text-xs font-black text-gray-900 leading-tight whitespace-nowrap overflow-hidden w-full">
-                        {produto.linha1}
-                      </h4>
-                      
-                      <div className="flex items-center gap-1.5 w-full">
-                        <span className="bg-[#0095ff] text-white text-[9px] px-1.5 py-0.5 rounded font-black shrink-0">
-                          Indicado
-                        </span>
-                        <span className="text-xs font-black text-gray-900 truncate flex-1">
-                          {produto.linha2}
-                        </span>
-                      </div>
+                    {/* CAMADA DE OVERLAY UNIFICADA: Escurece o card inteiro por igual (imagem e texto) ao segurar */}
+                    <div className={`absolute inset-0 bg-black/15 pointer-events-none transition-opacity duration-150 z-40 ${estaSegurando ? 'opacity-100' : 'opacity-0'}`} />
+
+                    {/* Onda de escurecimento nascendo no ponto exato do toque */}
+                    {ondas[produto.id]?.map((onda) => (
+                      <span
+                        key={onda.id}
+                        className="absolute rounded-full bg-black/20 pointer-events-none animate-ripple-wave z-50"
+                        style={{
+                          left: onda.x,
+                          top: onda.y,
+                          width: '20px',
+                          height: '20px',
+                          marginLeft: '-10px',
+                          marginTop: '-10px',
+                        }}
+                      />
+                    ))}
+
+                    {/* Imagem do Card */}
+                    <div className={`w-full ${produto.alturaCard} bg-gray-50 relative flex items-center justify-center p-2 shrink-0 pointer-events-none`}>
+                      <img src="/perfil.jpeg" alt={produto.linha1} className="w-full h-full object-contain" />
                     </div>
-                    
-                    {/* Bloco inferior */}
-                    <div className="mt-1.5 w-full">
-                      <div className="flex justify-between items-baseline w-full">
-                        <div className="text-sm font-black text-gray-900 whitespace-nowrap">{produto.preco}</div>
-                        <div className="text-[10px] text-gray-800 font-bold whitespace-nowrap">
-                          {produto.vendidos}
+
+                    {/* Área de Texto */}
+                    <div className="p-2.5 flex flex-col justify-between flex-1 text-gray-900 w-full relative z-10 pointer-events-none">
+                      
+                      {/* Bloco do Título */}
+                      <div className="flex flex-col gap-0.5 w-full">
+                        <h4 className="text-xs font-black text-gray-900 leading-tight whitespace-nowrap overflow-hidden w-full">
+                          {produto.linha1}
+                        </h4>
+                        
+                        <div className="flex items-center gap-1.5 w-full">
+                          <span className="bg-[#0095ff] text-white text-[9px] px-1.5 py-0.5 rounded font-black shrink-0">
+                            Indicado
+                          </span>
+                          <span className="text-xs font-black text-gray-900 truncate flex-1">
+                            {produto.linha2}
+                          </span>
                         </div>
                       </div>
                       
-                      <span className="text-[10px] text-gray-700 font-bold block mt-0.5">{produto.parcelamento}</span>
-                    </div>
+                      {/* Bloco inferior */}
+                      <div className="mt-1.5 w-full">
+                        <div className="flex justify-between items-baseline w-full">
+                          <div className="text-sm font-black text-gray-900 whitespace-nowrap">{produto.preco}</div>
+                          <div className="text-[10px] text-gray-800 font-bold whitespace-nowrap">
+                            {produto.vendidos}
+                          </div>
+                        </div>
+                        
+                        <span className="text-[10px] text-gray-700 font-bold block mt-0.5">{produto.parcelamento}</span>
+                      </div>
 
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="col-span-2 text-center py-10 text-white/80 text-sm font-bold">
-                Nenhum produto encontrado para "{termoBusca}" 😕
+                Nenhum produto encontrado para "{termoFiltrado}" 😕
               </div>
             )}
 
