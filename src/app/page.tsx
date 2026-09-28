@@ -251,12 +251,9 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-1 w-full">
-          {/* Caixa de pesquisa com camadas: Fundo azul no canto + Input + Lupa por cima */}
+          {/* Caixa de pesquisa principal */}
           <div className="flex-1 relative flex items-center bg-white rounded-xl border-2 border-[#1342e2] overflow-hidden shadow-sm h-10">
             
-            {/* Camada 1: O cantinho colorido exatamente na curva onde termina o input */}
-            <div className="absolute right-0 top-0 bottom-0 w-11 bg-[#1342e2] rounded-r-xl pointer-events-none" />
-
             <input
               type="text"
               value={termoBusca}
@@ -267,10 +264,16 @@ export default function Home() {
               className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-12 focus:outline-none relative z-10"
             />
             
-            {/* Camada 2: A imagem da lupa colocada por cima do fundo colorido */}
+            {/* 1. O retangulozinho pequeno cobrindo o arredondamento da esquina direita com a cor azul */}
+            <div 
+              className="absolute right-0 top-0 bottom-0 w-4 bg-[#1342e2] rounded-tr-[10px] rounded-br-[10px] pointer-events-none z-15"
+            />
+
+            {/* 2. O botão com a imagem da lupa por cima, exatamente com 50px de largura e 49px de altura */}
             <div 
               onClick={executarBusca}
-              className="absolute right-0 top-0 bottom-0 flex items-center justify-center cursor-pointer px-3 z-20"
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer z-20"
+              style={{ width: '50px', height: '49px' }}
             >
               <img 
                 src="/lupa.png" 
