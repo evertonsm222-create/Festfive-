@@ -66,7 +66,6 @@ export default function Home() {
     }
   ];
 
-  // Banners originais
   const bannersOriginais = [
     "/banner.png",
     "/banner1.png",
@@ -75,7 +74,7 @@ export default function Home() {
     "/banner4.png"
   ];
 
-  // Adicionamos o primeiro banner no final para criar o efeito de loop contínuo sem transição seca
+  // Criamos uma lista estendida clonando o primeiro banner no final para o loop contínuo perfeito
   const banners = [...bannersOriginais, bannersOriginais[0]];
 
   const [bannerAtual, setBannerAtual] = useState(0);
@@ -101,28 +100,27 @@ export default function Home() {
         const proximo = prev + 1;
         if (carrosselRef.current) {
           const larguraBanner = carrosselRef.current.clientWidth;
-          
-          if (proximo >= banners.length) {
-            return prev;
+
+          if (proximo < banners.length) {
+            carrosselRef.current.scrollTo({
+              left: proximo * larguraBanner,
+              behavior: 'smooth'
+            });
           }
 
-          carrosselRef.current.scrollTo({
-            left: proximo * larguraBanner,
-            behavior: 'smooth'
-          });
-
-          // Se chegou na cópia do primeiro banner no final
+          // Se chegou na cópia do primeiro banner no final da lista
           if (proximo === bannersOriginais.length) {
             setTimeout(() => {
               if (carrosselRef.current) {
+                // Reseta a rolagem para o início de forma totalmente invisível (sem animação)
                 carrosselRef.current.scrollTo({
                   left: 0,
                   behavior: 'auto'
                 });
               }
               setBannerAtual(0);
-            }, 400); // Reseta instantaneamente e sem animação de volta após o término do slide
-            return 0;
+            }, 400); // Tempo exato da animação de scroll
+            return bannersOriginais.length;
           }
         }
         return proximo;
@@ -139,13 +137,9 @@ export default function Home() {
     if (!carrosselRef.current) return;
     const larguraBanner = carrosselRef.current.clientWidth;
     const scrollAtual = carrosselRef.current.scrollLeft;
-    let indexCalculado = Math.round(scrollAtual / larguraBanner);
-    
-    if (indexCalculado >= bannersOriginais.length) {
-      indexCalculado = 0;
-    }
+    const indexCalculado = Math.round(scrollAtual / larguraBanner);
 
-    if (indexCalculado !== bannerAtual && indexCalculado >= 0 && indexCalculado < bannersOriginais.length) {
+    if (indexCalculado < bannersOriginais.length) {
       setBannerAtual(indexCalculado);
     }
   };
