@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
-  const produtos = [
+  const produtosIniciais = [
     {
       id: 1,
       imagem: "/fem.jpeg",
@@ -77,6 +78,7 @@ export default function Home() {
   const banners = [...bannersOriginais, bannersOriginais[0]];
 
   const [bannerAtual, setBannerAtual] = useState(0);
+  const [termoBusca, setTermoBusca] = useState('');
   const carrosselRef = useRef<HTMLDivElement>(null);
 
   const isInteracting = useRef(false);
@@ -115,7 +117,6 @@ export default function Home() {
           behavior: 'smooth'
         });
 
-        // Se chegou no clone (último banner), agendamos o reset instantâneo para o início logo após a animação suave
         if (proximo === banners.length - 1) {
           setTimeout(() => {
             if (carrosselRef.current) {
@@ -125,7 +126,7 @@ export default function Home() {
               });
             }
             setBannerAtual(0);
-          }, 600); // 600ms é o tempo ideal para a animação smooth concluir a viagem inteira
+          }, 600);
 
           return 0;
         }
@@ -155,6 +156,13 @@ export default function Home() {
     }
   };
 
+  // Filtragem dinâmica dos produtos de acordo com a pesquisa
+  const produtosFiltrados = produtosIniciais.filter((produto) => {
+    const textoBusca = termoBusca.toLowerCase();
+    const tituloCompleto = `${produto.linha1} ${produto.linha2}`.toLowerCase();
+    return tituloCompleto.includes(textoBusca);
+  });
+
   return (
     <div 
       className="min-h-screen w-full text-white flex flex-col items-center pb-12 bg-repeat bg-top overflow-x-hidden"
@@ -181,6 +189,8 @@ export default function Home() {
           <div className="flex-1 relative flex items-center bg-white rounded-xl border-2 border-[#1342e2] overflow-hidden shadow-sm h-10">
             <input
               type="text"
+              value={termoBusca}
+              onChange={(e) => setTermoBusca(e.target.value)}
               placeholder="Buscar produto ou ofertas!"
               style={{ fontSize: "13px" }}
               className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-12 focus:outline-none"
@@ -193,9 +203,11 @@ export default function Home() {
             </div>
           </div>
 
-          <button className="w-10 h-10 rounded-xl border border-blue-500/60 bg-[#00092d] flex items-center justify-center transition-colors shrink-0 overflow-hidden shadow-sm">
-            <img src="/perfil.jpeg" alt="Perfil" className="w-full h-full object-cover" />
-          </button>
+          <Link href="/cliente">
+            <button className="w-10 h-10 rounded-xl border border-blue-500/60 bg-[#00092d] flex items-center justify-center transition-colors shrink-0 overflow-hidden shadow-sm cursor-pointer">
+              <img src="/perfil.jpeg" alt="Perfil" className="w-full h-full object-cover" />
+            </button>
+          </Link>
 
           <div className="relative shrink-0">
             <button className="w-10 h-10 rounded-xl border border-blue-500/60 bg-[#00092d] flex items-center justify-center transition-colors overflow-hidden shadow-sm">
@@ -277,48 +289,57 @@ export default function Home() {
         <section className="w-full">
           <div className="grid grid-cols-2 gap-2 items-stretch">
             
-            {produtos.map((produto) => (
-              <div key={produto.id} className="bg-white rounded-lg overflow-hidden shadow-lg flex flex-col justify-between border border-gray-200">
-                
-                {/* Imagem do Card */}
-                <div className={`w-full ${produto.alturaCard} bg-gray-50 relative flex items-center justify-center p-2 shrink-0`}>
-                  <img src="/perfil.jpeg" alt={produto.linha1} className="w-full h-full object-contain" />
-                </div>
-
-                {/* Área de Texto */}
-                <div className="p-2.5 flex flex-col justify-between flex-1 text-gray-900 w-full">
+            {produtosFiltrados.length > 0 ? (
+              produtosFiltrados.map((produto) => (
+                <div 
+                  key={produto.id} 
+                  className="bg-white rounded-lg overflow-hidden shadow-lg flex flex-col justify-between border border-gray-200 transition-transform duration-150 active:scale-95 cursor-pointer"
+                >
                   
-                  {/* Bloco do Título */}
-                  <div className="flex flex-col gap-0.5 w-full">
-                    <h4 className="text-xs font-black text-gray-900 leading-tight whitespace-nowrap overflow-hidden w-full">
-                      {produto.linha1}
-                    </h4>
-                    
-                    <div className="flex items-center gap-1.5 w-full">
-                      <span className="bg-[#0095ff] text-white text-[9px] px-1.5 py-0.5 rounded font-black shrink-0">
-                        Indicado
-                      </span>
-                      <span className="text-xs font-black text-gray-900 truncate flex-1">
-                        {produto.linha2}
-                      </span>
-                    </div>
+                  {/* Imagem do Card */}
+                  <div className={`w-full ${produto.alturaCard} bg-gray-50 relative flex items-center justify-center p-2 shrink-0`}>
+                    <img src="/perfil.jpeg" alt={produto.linha1} className="w-full h-full object-contain" />
                   </div>
-                  
-                  {/* Bloco inferior */}
-                  <div className="mt-1.5 w-full">
-                    <div className="flex justify-between items-baseline w-full">
-                      <div className="text-sm font-black text-gray-900 whitespace-nowrap">{produto.preco}</div>
-                      <div className="text-[10px] text-gray-800 font-bold whitespace-nowrap">
-                        {produto.vendidos}
+
+                  {/* Área de Texto */}
+                  <div className="p-2.5 flex flex-col justify-between flex-1 text-gray-900 w-full">
+                    
+                    {/* Bloco do Título */}
+                    <div className="flex flex-col gap-0.5 w-full">
+                      <h4 className="text-xs font-black text-gray-900 leading-tight whitespace-nowrap overflow-hidden w-full">
+                        {produto.linha1}
+                      </h4>
+                      
+                      <div className="flex items-center gap-1.5 w-full">
+                        <span className="bg-[#0095ff] text-white text-[9px] px-1.5 py-0.5 rounded font-black shrink-0">
+                          Indicado
+                        </span>
+                        <span className="text-xs font-black text-gray-900 truncate flex-1">
+                          {produto.linha2}
+                        </span>
                       </div>
                     </div>
                     
-                    <span className="text-[10px] text-gray-700 font-bold block mt-0.5">{produto.parcelamento}</span>
-                  </div>
+                    {/* Bloco inferior */}
+                    <div className="mt-1.5 w-full">
+                      <div className="flex justify-between items-baseline w-full">
+                        <div className="text-sm font-black text-gray-900 whitespace-nowrap">{produto.preco}</div>
+                        <div className="text-[10px] text-gray-800 font-bold whitespace-nowrap">
+                          {produto.vendidos}
+                        </div>
+                      </div>
+                      
+                      <span className="text-[10px] text-gray-700 font-bold block mt-0.5">{produto.parcelamento}</span>
+                    </div>
 
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-10 text-white/80 text-sm font-bold">
+                Nenhum produto encontrado para "{termoBusca}" 😕
               </div>
-            ))}
+            )}
 
           </div>
         </section>
