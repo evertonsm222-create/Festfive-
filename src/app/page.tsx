@@ -264,7 +264,7 @@ export default function Home() {
             <div 
               onClick={executarBusca}
               className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-end cursor-pointer"
-              style={{ width: '52px', height: '49px' }}
+              style={{ width: '58px', height: '49px' }}
             >
               <img src="/lupa.png" alt="Pesquisar" className="w-full h-full object-fill object-right pointer-events-none" />
             </div>
