@@ -66,13 +66,17 @@ export default function Home() {
     }
   ];
 
-  const banners = [
+  // Banners originais
+  const bannersOriginais = [
     "/banner.png",
     "/banner1.png",
     "/banner2.png",
     "/banner3.png",
     "/banner4.png"
   ];
+
+  // Adicionamos o primeiro banner no final para criar o efeito de loop contínuo sem transição seca
+  const banners = [...bannersOriginais, bannersOriginais[0]];
 
   const [bannerAtual, setBannerAtual] = useState(0);
   const carrosselRef = useRef<HTMLDivElement>(null);
@@ -89,7 +93,6 @@ export default function Home() {
     }, 5000);
   };
 
-  // Auto-play contínuo e infinito para a frente
   useEffect(() => {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
@@ -100,20 +103,29 @@ export default function Home() {
           const larguraBanner = carrosselRef.current.clientWidth;
           
           if (proximo >= banners.length) {
-            // Vai para o primeiro de forma fluida simulando o giro contínuo
-            carrosselRef.current.scrollTo({
-              left: 0,
-              behavior: 'smooth'
-            });
+            return prev;
+          }
+
+          carrosselRef.current.scrollTo({
+            left: proximo * larguraBanner,
+            behavior: 'smooth'
+          });
+
+          // Se chegou na cópia do primeiro banner no final
+          if (proximo === bannersOriginais.length) {
+            setTimeout(() => {
+              if (carrosselRef.current) {
+                carrosselRef.current.scrollTo({
+                  left: 0,
+                  behavior: 'auto'
+                });
+              }
+              setBannerAtual(0);
+            }, 400); // Reseta instantaneamente e sem animação de volta após o término do slide
             return 0;
-          } else {
-            carrosselRef.current.scrollTo({
-              left: proximo * larguraBanner,
-              behavior: 'smooth'
-            });
           }
         }
-        return proximo >= banners.length ? 0 : proximo;
+        return proximo;
       });
     }, 3500);
 
@@ -121,15 +133,19 @@ export default function Home() {
       clearInterval(intervalo);
       if (resumeTimer.current) clearTimeout(resumeTimer.current);
     };
-  }, [banners.length]);
+  }, [banners.length, bannersOriginais.length]);
 
   const handleScroll = () => {
     if (!carrosselRef.current) return;
     const larguraBanner = carrosselRef.current.clientWidth;
     const scrollAtual = carrosselRef.current.scrollLeft;
-    const indexCalculado = Math.round(scrollAtual / larguraBanner);
+    let indexCalculado = Math.round(scrollAtual / larguraBanner);
     
-    if (indexCalculado !== bannerAtual && indexCalculado >= 0 && indexCalculado < banners.length) {
+    if (indexCalculado >= bannersOriginais.length) {
+      indexCalculado = 0;
+    }
+
+    if (indexCalculado !== bannerAtual && indexCalculado >= 0 && indexCalculado < bannersOriginais.length) {
       setBannerAtual(indexCalculado);
     }
   };
@@ -198,7 +214,7 @@ export default function Home() {
             className="w-full h-72 flex overflow-x-auto snap-x snap-mandatory scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none"
           >
             {banners.map((src, index) => (
-              <div key={src} className="w-full h-full shrink-0 snap-center relative">
+              <div key={`${src}-${index}`} className="w-full h-full shrink-0 snap-center relative">
                 <img 
                   src={src} 
                   alt={`Banner ${index + 1}`} 
@@ -210,7 +226,7 @@ export default function Home() {
             
           {/* Bolinhas indicadoras */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
-            {banners.map((_, index) => (
+            {bannersOriginais.map((_, index) => (
               <span 
                 key={index} 
                 className={`rounded-full transition-all duration-300 ${
