@@ -74,6 +74,7 @@ export default function Home() {
     "/banner4.png"
   ];
 
+  // Adiciona o clone do primeiro banner no final
   const banners = [...bannersOriginais, bannersOriginais[0]];
 
   const [indiceAtual, setIndiceAtual] = useState(0);
@@ -94,26 +95,30 @@ export default function Home() {
     const intervalo = setInterval(() => {
       if (isInteracting.current) return;
 
-      setIndiceAtual((prev) => {
-        const proximo = prev + 1;
-        
-        if (proximo === banners.length - 1) {
-          setTimeout(() => {
-            setTransicaoAtiva(false);
-            setIndiceAtual(0);
-            setTimeout(() => setTransicaoAtiva(true), 50);
-          }, 500);
-        }
-
-        return proximo >= banners.length ? 0 : proximo;
-      });
+      setIndiceAtual((prev) => prev + 1);
     }, 3000);
 
     return () => {
       clearInterval(intervalo);
       if (resumeTimer.current) clearTimeout(resumeTimer.current);
     };
-  }, [banners.length]);
+  }, []);
+
+  // Monitora quando o carrossel chega exatamente no clone (último item)
+  const lidarComFimDaTransicao = () => {
+    if (indiceAtual === banners.length - 1) {
+      // Desliga a animação instantaneamente e joga de volta para o início real (índice 0)
+      setTransicaoAtiva(false);
+      setIndiceAtual(0);
+
+      // Religa a animação no próximo ciclo de renderização
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTransicaoAtiva(true);
+        });
+      });
+    }
+  };
 
   return (
     <div 
@@ -171,20 +176,25 @@ export default function Home() {
       {/* CARROSSEL */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
         <div 
-          className="relative w-full overflow-hidden mb-3 rounded-xl"
+          className="relative w-screen left-1/2 -translate-x-1/2 mb-3 overflow-hidden"
           onTouchStart={pausarPorInteracao}
           onMouseDown={pausarPorInteracao}
         >
-          {/* Trilho deslizante com largura proporcional exata baseada na quantidade de banners */}
+          {/* Trilho deslizante com evento nativo de término de transição */}
           <div 
-            className={`flex ${transicaoAtiva ? 'transition-transform duration-500 ease-in-out' : ''}`}
+            className={`flex w-full ${transicaoAtiva ? 'transition-transform duration-500 ease-in-out' : ''}`}
             style={{ 
               width: `${banners.length * 100}%`,
               transform: `translateX(-${(indiceAtual * 100) / banners.length}%)` 
             }}
+            onTransitionEnd={lidarComFimDaTransicao}
           >
             {banners.map((src, index) => (
-              <div key={index} className="h-72 relative" style={{ width: `${100 / banners.length}%` }}>
+              <div 
+                key={index} 
+                className="h-72 relative shrink-0"
+                style={{ width: `${100 / banners.length}%` }}
+              >
                 <img 
                   src={src} 
                   alt={`Banner ${index + 1}`} 
