@@ -261,16 +261,18 @@ export default function Home() {
               style={{ fontSize: "13px" }}
               className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-14 focus:outline-none border-none shadow-none"
             />
-            {/* Botão de busca com largura e altura personalizadas em pixels */}
+            
+            {/* Apenas a imagem da lupa funcionando como botão, sem fundo azul extra */}
             <div 
               onClick={executarBusca}
-              className="absolute right-0 top-0 bottom-0 bg-[#1342e2] rounded-r-xl flex items-center justify-center cursor-pointer overflow-hidden"
+              className="absolute right-0 top-0 bottom-0 flex items-center justify-center cursor-pointer overflow-hidden pr-2"
               style={{ width: '50px', height: '39px' }}
             >
               <img 
                 src="/lupa.png" 
                 alt="Pesquisar" 
-                className="w-6 h-6 object-contain filter brightness-0 invert pointer-events-none" 
+                className="pointer-events-none object-contain" 
+                style={{ width: '22px', height: '22px' }}
               />
             </div>
           </div>
