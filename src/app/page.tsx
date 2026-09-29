@@ -259,21 +259,15 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder="Buscar produto ou ofertas!"
               style={{ fontSize: "13px" }}
-              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-14 focus:outline-none border-none shadow-none"
+              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-14 focus:outline-none"
             />
             
-            {/* Apenas a imagem da lupa funcionando como botão, sem fundo azul extra */}
             <div 
               onClick={executarBusca}
-              className="absolute right-0 top-0 bottom-0 flex items-center justify-center cursor-pointer overflow-hidden pr-2"
-              style={{ width: '50px', height: '39px' }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
+              style={{ width: '50px', height: '49px' }}
             >
-              <img 
-                src="/lupa.png" 
-                alt="Pesquisar" 
-                className="pointer-events-none object-contain" 
-                style={{ width: '22px', height: '22px' }}
-              />
+              <img src="/lupa.png" alt="Pesquisar" className="w-full h-full object-fill pointer-events-none" />
             </div>
           </div>
 
@@ -296,7 +290,7 @@ export default function Home() {
 
       {/* CARROSSEL */}
       <main className="w-full max-w-md px-4 flex flex-col mt-0">
-        <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3">
+        <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3 group">
           <div 
             ref={carrosselRef}
             onScroll={handleScroll}
@@ -313,6 +307,44 @@ export default function Home() {
                 />
               </div>
             ))}
+          </div>
+
+          {/* Seta Esquerda (Só aparece com o hover do mouse) */}
+          <div 
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 z-10 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 hover:bg-black/60 rounded-full shadow-md"
+            onClick={() => {
+              if (!carrosselRef.current) return;
+              pausarPorInteracao();
+              const largura = carrosselRef.current.clientWidth;
+              const novoScroll = carrosselRef.current.scrollLeft - largura;
+              if (novoScroll < 0) {
+                carrosselRef.current.scrollTo({ left: (banners.length - 2) * largura, behavior: 'auto' });
+                setBannerAtual(bannersOriginais.length - 1);
+              } else {
+                carrosselRef.current.scrollTo({ left: novoScroll, behavior: 'smooth' });
+              }
+            }}
+          >
+            <span className="text-white text-lg font-bold drop-shadow-md">❮</span>
+          </div>
+
+          {/* Seta Direita (Só aparece com o hover do mouse) */}
+          <div 
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 z-10 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 hover:bg-black/60 rounded-full shadow-md"
+            onClick={() => {
+              if (!carrosselRef.current) return;
+              pausarPorInteracao();
+              const largura = carrosselRef.current.clientWidth;
+              
+              if (bannerAtual >= bannersOriginais.length - 1) {
+                carrosselRef.current.scrollTo({ left: 0, behavior: 'auto' });
+                setBannerAtual(0);
+              } else {
+                carrosselRef.current.scrollBy({ left: largura, behavior: 'smooth' });
+              }
+            }}
+          >
+            <span className="text-white text-lg font-bold drop-shadow-md">❯</span>
           </div>
             
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
