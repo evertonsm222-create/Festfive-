@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
+  console.log("TESTE DE ATUALIZACAO 123");
+
   const produtosIniciais = [
     {
       id: 1,
@@ -266,7 +268,6 @@ export default function Home() {
               className="absolute right-0 top-0 bottom-0 bg-[#1342e2] rounded-r-xl flex items-center justify-center cursor-pointer overflow-hidden"
               style={{ width: '45px' }}
             >
-              {/* Altere o valor de translateX(6px) aqui para testar o deslocamento exato */}
               <img 
                 src="/lupa.png" 
                 alt="Pesquisar" 
@@ -376,10 +377,8 @@ export default function Home() {
                     className="bg-white rounded-lg overflow-hidden shadow-lg flex flex-col justify-between border border-gray-200 cursor-pointer relative"
                   >
                     
-                    {/* CAMADA DE OVERLAY UNIFICADA: Escurece o card inteiro por igual (imagem e texto) ao segurar */}
                     <div className={`absolute inset-0 bg-black/15 pointer-events-none transition-opacity duration-150 z-40 ${estaSegurando ? 'opacity-100' : 'opacity-0'}`} />
 
-                    {/* Onda de escurecimento nascendo no ponto exato do toque */}
                     {ondas[produto.id]?.map((onda) => (
                       <span
                         key={onda.id}
@@ -395,15 +394,12 @@ export default function Home() {
                       />
                     ))}
 
-                    {/* Imagem do Card */}
                     <div className={`w-full ${produto.alturaCard} bg-gray-50 relative flex items-center justify-center p-2 shrink-0 pointer-events-none`}>
                       <img src="/perfil.jpeg" alt={produto.linha1} className="w-full h-full object-contain" />
                     </div>
 
-                    {/* Área de Texto */}
                     <div className="p-2.5 flex flex-col justify-between flex-1 text-gray-900 w-full relative z-10 pointer-events-none">
                       
-                      {/* Bloco do Título */}
                       <div className="flex flex-col gap-0.5 w-full">
                         <h4 className="text-xs font-black text-gray-900 leading-tight whitespace-nowrap overflow-hidden w-full">
                           {produto.linha1}
@@ -419,7 +415,6 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      {/* Bloco inferior */}
                       <div className="mt-1.5 w-full">
                         <div className="flex justify-between items-baseline w-full">
                           <div className="text-sm font-black text-gray-900 whitespace-nowrap">{produto.preco}</div>
