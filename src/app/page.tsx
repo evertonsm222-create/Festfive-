@@ -259,18 +259,18 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder="Buscar produto ou ofertas!"
               style={{ fontSize: "13px" }}
-              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-12 focus:outline-none border-none shadow-none"
+              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-14 focus:outline-none border-none shadow-none"
             />
+            {/* Botão de busca com largura e altura personalizadas em pixels */}
             <div 
               onClick={executarBusca}
               className="absolute right-0 top-0 bottom-0 bg-[#1342e2] rounded-r-xl flex items-center justify-center cursor-pointer overflow-hidden"
-              style={{ width: '45px' }}
+              style={{ width: '50px', height: '39px' }}
             >
               <img 
                 src="/lupa.png" 
                 alt="Pesquisar" 
-                className="w-5 h-5 object-contain pointer-events-none" 
-                style={{ transform: 'translateX(6px)' }}
+                className="w-6 h-6 object-contain filter brightness-0 invert pointer-events-none" 
               />
             </div>
           </div>
