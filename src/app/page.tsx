@@ -4,8 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
-  console.log("TESTE DE ATUALIZACAO 123");
-
   const produtosIniciais = [
     {
       id: 1,
@@ -271,7 +269,7 @@ export default function Home() {
               <img 
                 src="/lupa.png" 
                 alt="Pesquisar" 
-                className="w-5 h-5 object-contain filter brightness-0 invert pointer-events-none" 
+                className="w-5 h-5 object-contain pointer-events-none" 
                 style={{ transform: 'translateX(6px)' }}
               />
             </div>
