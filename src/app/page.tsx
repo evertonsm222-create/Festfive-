@@ -248,10 +248,17 @@ export default function Home() {
                       linear-gradient(90deg, #00f0ff, #0066ff, #00f0ff) border-box;
           border: 2px solid transparent;
         }
+
+        /* Linha divisoria neon padrao cyberpunk */
+        .linha-divisoria-neon {
+          background: linear-gradient(90deg, transparent, #00f0ff, #0066ff, #00f0ff, transparent);
+          height: 2px;
+          box-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+        }
       `}</style>
 
-      {/* HEADER */}
-      <header className="w-full px-2 pt-5 pb-3 flex flex-col gap-4 bg-[#00092d] relative z-50">
+      {/* HEADER COM A LINHA NEON NA BASE */}
+      <header className="w-full px-2 pt-5 pb-4 flex flex-col gap-4 bg-[#00092d] relative z-50">
         <div className="flex items-center justify-center w-full">
           <div className="relative w-80 h-28 flex items-center justify-center">
             <img 
@@ -305,10 +312,13 @@ export default function Home() {
           </div>
 
         </div>
+
+        {/* Linha divisoria neon na base do header */}
+        <div className="absolute bottom-0 left-0 w-full linha-divisoria-neon"></div>
       </header>
 
       {/* CARROSSEL */}
-      <main className="w-full max-w-md px-4 flex flex-col mt-0">
+      <main className="w-full max-w-md px-4 flex flex-col mt-2">
         <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3 group">
           <div 
             ref={carrosselRef}
@@ -380,6 +390,14 @@ export default function Home() {
 
         </div>
       </main>
+
+      {/* LINHA NEON E LOGO NO FINAL DO BANNER */}
+      <div className="w-full max-w-md px-4 mb-4 flex flex-col items-center">
+        <div className="w-full linha-divisoria-neon mb-3"></div>
+        <div className="w-28 h-8 flex items-center justify-center opacity-80">
+          <img src="/logo.png" alt="FestFive Logo Final" className="w-full h-full object-contain filter drop-shadow-[0_0_5px_rgba(0,240,255,0.6)]" />
+        </div>
+      </div>
 
       {/* CATEGORIAS */}
       <section className="w-full overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
