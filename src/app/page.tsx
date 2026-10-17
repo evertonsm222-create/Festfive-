@@ -249,7 +249,6 @@ export default function Home() {
           border: 2px solid transparent;
         }
 
-        /* Linha divisoria neon padrao cyberpunk */
         .linha-divisoria-neon {
           background: linear-gradient(90deg, transparent, #00f0ff, #0066ff, #00f0ff, transparent);
           height: 2px;
@@ -271,7 +270,6 @@ export default function Home() {
 
         <div className="flex items-center gap-1.5 w-full">
           
-          {/* BARRA DE PESQUISA */}
           <div className="flex-1 relative flex items-center rounded-xl borda-degrade-cliente overflow-hidden shadow-sm h-10 box-border">
             <input
               type="text"
@@ -294,14 +292,12 @@ export default function Home() {
             </button>
           </div>
 
-          {/* BOTÃO PERFIL */}
           <Link href="/cliente" className="shrink-0">
             <button className="w-10 h-10 rounded-xl borda-degrade-btn flex items-center justify-center shrink-0 overflow-hidden shadow-sm cursor-pointer p-0">
               <img src="/perfil.jpeg" alt="Perfil" className="w-full h-full object-cover" />
             </button>
           </Link>
 
-          {/* BOTÃO CARRINHO */}
           <div className="relative shrink-0">
             <button className="w-10 h-10 rounded-xl borda-degrade-btn flex items-center justify-center overflow-hidden shadow-sm p-0">
               <img src="/carrinho.jpeg" alt="Carrinho" className="w-full h-full object-cover" />
@@ -313,13 +309,12 @@ export default function Home() {
 
         </div>
 
-        {/* Linha divisoria neon na base do header */}
         <div className="absolute bottom-0 left-0 w-full linha-divisoria-neon"></div>
       </header>
 
-      {/* CARROSSEL */}
-      <main className="w-full max-w-md px-4 flex flex-col mt-2">
-        <div className="relative w-screen left-1/2 -translate-x-1/2 mb-3 group">
+      {/* CARROSSEL COLADO */}
+      <main className="w-full max-w-md px-0 flex flex-col mt-0">
+        <div className="relative w-full mb-0 group">
           <div 
             ref={carrosselRef}
             onScroll={handleScroll}
@@ -374,7 +369,6 @@ export default function Home() {
             <span className="text-white text-lg font-bold drop-shadow-md">❯</span>
           </div>
             
-          {/* INDICADORES (BOLINHAS ORIGINAIS) */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
             {bannersOriginais.map((_, index) => (
               <span 
@@ -391,12 +385,9 @@ export default function Home() {
         </div>
       </main>
 
-      {/* LINHA NEON E LOGO NO FINAL DO BANNER */}
-      <div className="w-full max-w-md px-4 mb-4 flex flex-col items-center">
-        <div className="w-full linha-divisoria-neon mb-3"></div>
-        <div className="w-28 h-8 flex items-center justify-center opacity-80">
-          <img src="/logo.png" alt="FestFive Logo Final" className="w-full h-full object-contain filter drop-shadow-[0_0_5px_rgba(0,240,255,0.6)]" />
-        </div>
+      {/* LINHA NEON NA BASE DO BANNER */}
+      <div className="w-full max-w-md px-2 my-3">
+        <div className="w-full linha-divisoria-neon"></div>
       </div>
 
       {/* CATEGORIAS */}
