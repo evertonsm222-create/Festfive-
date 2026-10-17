@@ -159,6 +159,13 @@ export default function Cliente() {
           width: 100%;
         }
 
+        /* Linha divisória neon na transição do cabeçalho */
+        .linha-divisoria-neon {
+          background: linear-gradient(90deg, transparent, #00f0ff, #0066ff, #00f0ff, transparent);
+          height: 2px;
+          box-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+        }
+
         .btn-cyber-glow {
           transition: transform 0.15s ease, filter 0.15s ease;
         }
@@ -299,6 +306,9 @@ export default function Cliente() {
           </div>
 
         </div>
+
+        {/* Linha divisória neon na base do header */}
+        <div className="absolute bottom-0 left-0 w-full linha-divisoria-neon"></div>
       </header>
 
       <main className="w-full max-w-md px-3 flex flex-col gap-4 mt-2">
