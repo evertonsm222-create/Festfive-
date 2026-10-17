@@ -312,9 +312,9 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-full linha-divisoria-neon"></div>
       </header>
 
-      {/* CARROSSEL COLADO */}
-      <main className="w-full max-w-md px-0 flex flex-col mt-0">
-        <div className="relative w-full mb-0 group">
+      {/* CARROSSEL COM A LINHA NEON COLADA NA BASE */}
+      <main className="w-full max-w-md px-0 flex flex-col mt-2">
+        <div className="relative w-full mb-2 group">
           <div 
             ref={carrosselRef}
             onScroll={handleScroll}
@@ -382,13 +382,11 @@ export default function Home() {
             ))}
           </div>
 
+          {/* LINHA NEON COLADA NA BASE DO BANNER */}
+          <div className="absolute bottom-0 left-0 w-full linha-divisoria-neon z-30"></div>
+
         </div>
       </main>
-
-      {/* LINHA NEON NA BASE DO BANNER */}
-      <div className="w-full max-w-md px-2 my-3">
-        <div className="w-full linha-divisoria-neon"></div>
-      </div>
 
       {/* CATEGORIAS */}
       <section className="w-full overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
