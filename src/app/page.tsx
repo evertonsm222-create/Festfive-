@@ -81,7 +81,7 @@ export default function Home() {
   const [termoBusca, setTermoBusca] = useState('');
   const [termoFiltrado, setTermoFiltrado] = useState('');
   
-  const [ondas, setOndas] = useState<{ [key: number]: { x: number; y: number; id: number }[] }>({});
+  const [ondas, setOndas] = useState<{ [key: number]: { x: number; y: number; id: number }[] }>( {});
   const [cardPressionado, setCardPressionado] = useState<number | null>(null);
 
   const carrosselRef = useRef<HTMLDivElement>(null);
@@ -313,7 +313,7 @@ export default function Home() {
       </header>
 
       {/* CARROSSEL COM A LINHA NEON COLADA NA BASE */}
-      <main className="w-full max-w-md px-0 flex flex-col mt-2">
+      <main className="w-full max-w-md px-0 flex flex-col mt-0">
         <div className="relative w-full mb-2 group">
           <div 
             ref={carrosselRef}
