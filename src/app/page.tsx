@@ -236,6 +236,18 @@ export default function Home() {
         .animate-ripple-wave {
           animation: rippleWave 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
+        .borda-degrade-cliente {
+          background: linear-gradient(#000921, #000921) padding-box,
+                      linear-gradient(90deg, #00f0ff, #0066ff, #00f0ff) border-box;
+          border: 2px solid transparent;
+        }
+
+        .borda-degrade-btn {
+          background: linear-gradient(#00092d, #00092d) padding-box,
+                      linear-gradient(90deg, #00f0ff, #0066ff, #00f0ff) border-box;
+          border: 2px solid transparent;
+        }
       `}</style>
 
       {/* HEADER */}
@@ -250,8 +262,10 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 w-full">
-          <div className="flex-1 relative flex items-center bg-white rounded-xl border-2 border-[#1342e2] overflow-hidden shadow-sm h-10">
+        <div className="flex items-center gap-1.5 w-full">
+          
+          {/* BARRA DE PESQUISA */}
+          <div className="flex-1 relative flex items-center rounded-xl borda-degrade-cliente overflow-hidden shadow-sm h-10 box-border">
             <input
               type="text"
               value={termoBusca}
@@ -259,32 +273,37 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               placeholder="Buscar produto ou ofertas!"
               style={{ fontSize: "13px" }}
-              className="w-full h-full bg-transparent text-[#1342e2] placeholder-[#1342e2] px-4 pr-14 focus:outline-none"
+              className="w-full h-full bg-transparent text-[#00f0ff] placeholder-[#00f0ff] placeholder-opacity-80 px-4 pr-14 focus:outline-none"
             />
             
-            <div 
+            <button 
+              type="button"
               onClick={executarBusca}
-              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
+              aria-label="Buscar"
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer bg-transparent border-none p-0 focus:outline-none"
               style={{ width: '50px', height: '49px' }}
             >
               <img src="/lupa.png" alt="Pesquisar" className="w-full h-full object-fill pointer-events-none" />
-            </div>
+            </button>
           </div>
 
-          <Link href="/cliente">
-            <button className="w-10 h-10 rounded-xl border border-blue-500/60 bg-[#00092d] flex items-center justify-center transition-colors shrink-0 overflow-hidden shadow-sm cursor-pointer">
+          {/* BOTÃO PERFIL */}
+          <Link href="/cliente" className="shrink-0">
+            <button className="w-10 h-10 rounded-xl borda-degrade-btn flex items-center justify-center shrink-0 overflow-hidden shadow-sm cursor-pointer p-0">
               <img src="/perfil.jpeg" alt="Perfil" className="w-full h-full object-cover" />
             </button>
           </Link>
 
+          {/* BOTÃO CARRINHO */}
           <div className="relative shrink-0">
-            <button className="w-10 h-10 rounded-xl border border-blue-500/60 bg-[#00092d] flex items-center justify-center transition-colors overflow-hidden shadow-sm">
+            <button className="w-10 h-10 rounded-xl borda-degrade-btn flex items-center justify-center overflow-hidden shadow-sm p-0">
               <img src="/carrinho.jpeg" alt="Carrinho" className="w-full h-full object-cover" />
             </button>
-            <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+            <span className="absolute -top-1 -right-1 bg-[#0066ff] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white z-20">
               0
             </span>
           </div>
+
         </div>
       </header>
 
@@ -309,7 +328,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Seta Esquerda (Só aparece com o hover do mouse) */}
           <div 
             className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 z-10 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 hover:bg-black/60 rounded-full shadow-md"
             onClick={() => {
@@ -328,7 +346,6 @@ export default function Home() {
             <span className="text-white text-lg font-bold drop-shadow-md">❮</span>
           </div>
 
-          {/* Seta Direita (Só aparece com o hover do mouse) */}
           <div 
             className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 z-10 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 hover:bg-black/60 rounded-full shadow-md"
             onClick={() => {
@@ -347,6 +364,7 @@ export default function Home() {
             <span className="text-white text-lg font-bold drop-shadow-md">❯</span>
           </div>
             
+          {/* INDICADORES (BOLINHAS ORIGINAIS) */}
           <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
             {bannersOriginais.map((_, index) => (
               <span 
